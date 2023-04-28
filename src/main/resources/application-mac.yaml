@@ -1,0 +1,8 @@
+debug: true
+
+spring:
+  application:
+    name: sharding-sphere-jdbc-demo
+  datasource:
+    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
+    url: jdbc:shardingsphere:classpath:datasource.yaml

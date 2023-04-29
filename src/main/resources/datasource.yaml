@@ -7,22 +7,23 @@ dataSources:
   master:
     dataSourceClassName: com.zaxxer.hikari.HikariDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
-    jdbcUrl: jdbc:mysql://192.18.134.94:3307/db_user
+    jdbcUrl: jdbc:mysql://192.18.134.94:3307/db_user?allowPublicKeyRetrieval=true&useSSL=false
     username: root
     password: yang123test
   slave:
     dataSourceClassName: com.zaxxer.hikari.HikariDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
-    jdbcUrl: jdbc:mysql://138.2.232.144:3307/db_user
+    jdbcUrl: jdbc:mysql://138.2.232.144:3307/db_user?allowPublicKeyRetrieval=true&useSSL=false
     username: root
     password: yang123test
 rules:
 - !READWRITE_SPLITTING
   dataSources:
-    staticStrategy:
-      writeDataSourceName: master
-      readDataSourceNames:
-        - slave
+    readwrite_ds:
+      staticStrategy:
+        writeDataSourceName: master
+        readDataSourceNames:
+          - slave
       loadBalancerName: random
   loadBalancers:
     random:

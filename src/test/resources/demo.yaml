@@ -1,0 +1,11 @@
+!READWRITE_SPLITTING
+dataSources:
+  readwrite_ds:
+    staticStrategy:
+      writeDataSourceName: master
+      readDataSourceNames:
+        - slave
+    loadBalancerName: random
+loadBalancers:
+  random:
+    type: RANDOM

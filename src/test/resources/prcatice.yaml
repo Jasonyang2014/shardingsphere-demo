@@ -1,0 +1,7 @@
+!car
+plate: 12-XP-F4
+wheels:
+  - id: 1
+    dice:
+      a: 1
+      b: 2

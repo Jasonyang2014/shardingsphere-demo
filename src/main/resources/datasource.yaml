@@ -29,6 +29,6 @@ rules:
     random:
       type: RANDOM
 props:
-  show-sql: true
+  sql-show: true
 #  key_1: value_1
 #  key_2: value_2

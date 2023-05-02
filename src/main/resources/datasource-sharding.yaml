@@ -1,0 +1,90 @@
+#databaseName (?):
+mode:
+  type: Standalone
+  repository:
+    type: JDBC
+dataSources:
+  ds_0:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://192.18.134.94:3307/master?allowPublicKeyRetrieval=true&useSSL=false
+    username: root
+    password: yang123test
+  ds_1:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://138.2.232.144:3307/slave?allowPublicKeyRetrieval=true&useSSL=false
+    username: root
+    password: yang123test
+rules:
+  - !SHARDING
+    tables:
+      # 数据分片规则配置 <logic_table_name> (+): # 逻辑表名称
+      t_order:
+        # 由数据源名 + 表名组成(参考 Inline 语法规则) databaseStrategy (?): # 分库策略，缺省表示使用默认分库策略，以下的分片策略只能选其一
+        actualDataNodes: ds_${0..1}.t_order${0..1}
+        databaseStrategy:
+          standard:
+            shardingColumn: order_no
+            shardingAlgorithmName: database_inline
+        tableStrategy: # 分表策略，同分库策略
+          standard:
+            shardingColumn: order_no
+            shardingAlgorithmName: t_order_inline
+        keyGenerateStrategy:
+          column: order_no
+          keyGeneratorName: snowflake
+      t_order_item:
+        actualDataNodes: ds_${0..1}.t_order_item${0..1}
+        databaseStrategy:
+          standard:
+            shardingColumn: order_no
+            shardingAlgorithmName: database_inline
+        tableStrategy: # 分表策略，同分库策略
+          standard:
+            shardingColumn: order_no
+            shardingAlgorithmName: t_order_item_inline
+        keyGenerateStrategy:
+          column: order_no
+          keyGeneratorName: snowflake
+      t_user:
+        actualDataNodes: ds_${0..1}.t_user
+        databaseStrategy:
+          standard:
+            shardingColumn: id
+            shardingAlgorithmName: t_user_mod
+        keyGenerateStrategy:
+          column: id
+          keyGeneratorName: snowflake
+#    bindingTables:
+#      - t_order,t_order_item
+    shardingAlgorithms:
+      database_inline:
+        type: INLINE
+        props:
+          algorithm-expression: ds_${order_no % 2}
+      t_order_inline:
+        type: INLINE
+        props:
+          algorithm-expression: t_order${order_no % 2}
+      t_order_item_inline:
+        type: INLINE
+        props:
+          algorithm-expression: t_order_item${order_no % 2}
+      t_user_mod:
+        type: MOD
+        props:
+          sharding-count: 2
+    keyGenerators:
+      snowflake:
+        type: SNOWFLAKE
+
+
+
+
+
+
+props:
+  sql-show: true
+#  key_1: value_1
+#  key_2: value_2

@@ -21,7 +21,7 @@ public class YamlReadTest {
 
     @Test
     public void testReadYaml() {
-        final String path = "/Users/Yang/workstation/sharding-demo/src/main/resources/datasource.yaml";
+        final String path = "/Users/Yang/workstation/sharding-demo/src/main/resources/datasource-sharding.yaml";
         YamlRootConfiguration unmarshal;
         try {
             unmarshal = YamlEngine.unmarshal(new File(path), YamlRootConfiguration.class);

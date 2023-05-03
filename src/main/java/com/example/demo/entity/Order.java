@@ -12,10 +12,7 @@ import java.math.BigDecimal;
 @TableName("t_order")
 public class Order {
 
-    @TableId(type = IdType.AUTO)
-    private Long id;
-
-    @TableField("order_no")
+    @TableId(value = "order_no",type = IdType.AUTO)
     private Long orderNo;
 
     @TableField("user_id")

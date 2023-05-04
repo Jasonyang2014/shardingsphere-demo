@@ -1,18 +1,17 @@
 package com.example.demo.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
-import com.example.demo.dto.OrderDetailDTO;
 import com.example.demo.entity.Order;
 import com.example.demo.mapper.OrderMapper;
 import com.example.demo.service.OrderService;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -23,20 +22,19 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public PageDTO<Order> page(Page query) {
-        query = Optional.ofNullable(query).orElse(new Page());
-
+        query = Optional.ofNullable(query).orElse(new Page<>());
         QueryWrapper<Order> orderQueryWrapper = new QueryWrapper<>();
         orderQueryWrapper.orderByAsc("order_no");
-        orderQueryWrapper.last(String.format("limit %d, %d", query.getCurrent(), query.getSize()));
-        Page<Order> page = orderMapper.selectPage(query, orderQueryWrapper);
+        PageHelper.startPage((int) query.getCurrent(), (int) query.getSize());
+        List<Order> orders = orderMapper.selectList(orderQueryWrapper);
+        PageInfo<Order> page = new PageInfo<>(orders);
+
         PageDTO<Order> pageDTO = new PageDTO<>();
-        pageDTO.setOrders(page.orders());
-        pageDTO.setPages(page.getPages());
-        pageDTO.setRecords(page.getRecords());
-        pageDTO.setCurrent(page.getCurrent());
+        pageDTO.setRecords(page.getList());
+        pageDTO.setCurrent(page.getPageNum());
         pageDTO.setSize(page.getSize());
-        pageDTO.setPages(page.getPages());
         pageDTO.setTotal(page.getTotal());
+        pageDTO.setPages(page.getPages());
         return pageDTO;
     }
 }

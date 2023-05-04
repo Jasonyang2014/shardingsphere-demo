@@ -1,4 +1,8 @@
 debug: true
+page-helper:
+  helperDialect: mysql
+  reasonable: true
+  defaultCount: true
 logging:
   file:
     name: myapp.log

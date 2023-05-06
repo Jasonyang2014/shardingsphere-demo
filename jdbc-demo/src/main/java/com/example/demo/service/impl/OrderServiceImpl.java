@@ -4,10 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.example.demo.entity.Order;
+import com.example.demo.entity.OrderItem;
+import com.example.demo.mapper.OrderItemMapper;
 import com.example.demo.mapper.OrderMapper;
 import com.example.demo.service.OrderService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import io.seata.spring.annotation.GlobalTransactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +22,7 @@ import java.util.Optional;
 public class OrderServiceImpl implements OrderService {
 
     private final OrderMapper orderMapper;
+    private final OrderItemMapper orderItemMapper;
 
     @Override
     public PageDTO<Order> page(Page query) {
@@ -36,5 +40,21 @@ public class OrderServiceImpl implements OrderService {
         pageDTO.setTotal(page.getTotal());
         pageDTO.setPages(page.getPages());
         return pageDTO;
+    }
+
+    @GlobalTransactional
+    @Override
+    public Integer saveOrder(Order order) {
+        return orderMapper.insert(order);
+    }
+
+
+    @GlobalTransactional
+    @Override
+    public Integer saveOrderAndItem(Order order, OrderItem orderItem) {
+        int orderCnt = orderMapper.insert(order);
+        orderItem.setOrderNo(order.getOrderNo());
+        int itemCnt = orderItemMapper.insert(orderItem);
+        return orderCnt + itemCnt;
     }
 }

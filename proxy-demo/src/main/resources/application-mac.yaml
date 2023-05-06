@@ -8,6 +8,10 @@ logging:
     com.mysql.jc: trace
   file:
     name: myapp.log
+
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource

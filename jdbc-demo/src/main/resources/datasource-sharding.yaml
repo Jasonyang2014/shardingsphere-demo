@@ -45,7 +45,7 @@ rules:
             shardingColumn: order_no
             shardingAlgorithmName: t_order_item_inline
         keyGenerateStrategy:
-          column: order_no
+          column: id
           keyGeneratorName: snowflake
       t_user:
         actualDataNodes: ds_${0..1}.t_user

@@ -40,6 +40,15 @@
             <version>5.3.2</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.apache.shardingsphere/shardingsphere-transaction-base-seata-at -->
+        <dependency>
+            <groupId>org.apache.shardingsphere</groupId>
+            <artifactId>shardingsphere-transaction-base-seata-at</artifactId>
+            <version>5.3.2</version>
+        </dependency>
+
+
+
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
@@ -89,17 +98,26 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/io.github.greycode/shardingsphere-transaction-base-seata-at -->
 <!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-starter-test</artifactId>-->
-<!--            <scope>test</scope>-->
-<!--            <exclusions>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.yaml</groupId>-->
-<!--                    <artifactId>snakeyaml</artifactId>-->
-<!--                </exclusion>-->
-<!--            </exclusions>-->
+<!--            <groupId>io.github.greycode</groupId>-->
+<!--            <artifactId>shardingsphere-transaction-base-seata-at</artifactId>-->
+<!--            <version>5.3.2.4</version>-->
 <!--        </dependency>-->
+
+        <!-- https://mvnrepository.com/artifact/io.seata/seata-all -->
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-all</artifactId>
+            <version>1.6.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.antlr</groupId>
+                    <artifactId>antlr4</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
 
     </dependencies>
 

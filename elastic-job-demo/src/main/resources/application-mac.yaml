@@ -1,0 +1,13 @@
+debug: true
+page-helper:
+  helperDialect: mysql
+  reasonable: true
+  defaultCount: true
+spring:
+  application:
+    name: elastic-job-demo
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://loclhost:3306/php_test
+    username: root
+    password: root

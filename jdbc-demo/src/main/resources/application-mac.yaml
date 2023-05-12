@@ -1,11 +1,16 @@
-debug: true
+debug: false
 page-helper:
   helperDialect: mysql
   reasonable: true
   defaultCount: true
 logging:
-  file:
-    name: myapp.log
+  path: ${user.dir}
+  level:
+    web: debug
+    io.seata: info
+    org.apache.shardingsphere: debug
+#  file:
+#    name: myapp.log
 spring:
   application:
     name: sharding-sphere-jdbc-demo

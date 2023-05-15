@@ -31,11 +31,13 @@ elastic-job:
     namespace: elastic-job-lite
   jobs:
     simpleJob:
+      job-sharding-strategy-type: AVG_ALLOCATION
       elasticJobClass: com.example.elastic.job.demo.jobs.MyJob
-      cron: 0/30 * * * * ?
+      cron: 0/10 * * * * ?
       timeZone: GMT+08:00
-      shardingTotalCount: 2
-#      shardingItemParameters: 0=Beijing,1=Shanghai,2=Guangzhou
+      shardingTotalCount: 1
+      shardingItemParameters: 0=FEMALE,1=MALE,2=UNKNOW
+      job-parameter: 0,1,2
 #    scriptJob:
 #      elasticJobType: SCRIPT
 #      cron: 0/10 * * * * ?
@@ -48,4 +50,7 @@ elastic-job:
 #      shardingTotalCount: 1
 #      props:
 #        script.command.line: "echo Manual SCRIPT Job: "
+  tracing:
+    type: RDB
+
 

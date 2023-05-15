@@ -19,5 +19,13 @@
             (#{user.name}, #{user.gender})
         </foreach>
     </insert>
+
+    <select id="selectListByGender" resultType="com.example.elastic.job.demo.entity.User"
+            parameterType="object">
+        select
+        <include refid="baseSql"/>
+        from t_user
+        where gender = #{gender}
+    </select>
 </mapper>
 

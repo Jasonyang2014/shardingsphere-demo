@@ -1,6 +1,7 @@
 package com.example.elastic.job.demo.service.impl;
 
 import com.example.elastic.job.demo.entity.User;
+import com.example.elastic.job.demo.enums.GenderEnum;
 import com.example.elastic.job.demo.mapper.UserMapper;
 import com.example.elastic.job.demo.service.UserService;
 import lombok.AllArgsConstructor;
@@ -26,5 +27,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> findAll() {
         return userMapper.selectList(null);
+    }
+
+    @Override
+    public List<User> findByGender(GenderEnum genderEnum) {
+        return userMapper.selectListByGender(genderEnum);
     }
 }

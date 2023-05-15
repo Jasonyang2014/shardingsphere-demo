@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
+
+    <springProperty scope="context" name="logging.path" source="logging.path"/>
+<!--    <springProperty scope="context" name="logging.level" source="logging.level"/>-->
+    <springProperty scope="context" name="spring.application.name" source="spring.application.name"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{80} -%msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!--默认true-->
+        <append>true</append>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>debug</level>
+        </filter>
+        <file>${logging.path}/${spring.application.name}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <maxFileSize>20mb</maxFileSize>
+            <fileNamePattern>${logging.path}/${spring.application.name}.%d{yyyy-MM-dd}.%i.log.zip</fileNamePattern>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} -%msg%n</pattern>
+            <charset>utf-8</charset>
+        </encoder>
+    </appender>
+
+    <logger name="com.baomidou" level="debug" >
+        <appender-ref ref= "FILE"/>
+    </logger>
+    <logger name="com.example" level="debug" >
+        <appender-ref ref= "FILE"/>
+    </logger>
+    <logger name="org.apache.shardingsphere" level="debug" >
+        <appender-ref ref="FILE"/>
+    </logger>
+    <logger name="web" level="debug">
+        <appender-ref ref="FILE"/>
+    </logger>
+
+    <root level="info">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>

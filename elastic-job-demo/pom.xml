@@ -12,6 +12,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <elastic.job.version>3.0.3</elastic.job.version>
     </properties>
 
     <dependencies>
@@ -20,11 +21,19 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.apache.shardingsphere.elasticjob/elasticjob-lite-spring-boot-starter -->
         <dependency>
             <groupId>org.apache.shardingsphere.elasticjob</groupId>
-            <artifactId>elasticjob-lite-core</artifactId>
-            <version>3.0.3</version>
+            <artifactId>elasticjob-lite-spring-boot-starter</artifactId>
+            <version>${elastic.job.version}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.shardingsphere.elasticjob/elasticjob-error-handler-email -->
+        <dependency>
+            <groupId>org.apache.shardingsphere.elasticjob</groupId>
+            <artifactId>elasticjob-error-handler-email</artifactId>
+            <version>${elastic.job.version}</version>
+        </dependency>
+
 
         <!-- https://mvnrepository.com/artifact/com.baomidou/mybatis-plus-boot-starter -->
         <dependency>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.elastic.job.demo.mapper.UserMapper">
+
+    <resultMap id="base" type="com.example.elastic.job.demo.entity.User">
+        <id column="id" jdbcType="INTEGER" javaType="INTEGER"/>
+        <result column="name" jdbcType="VARCHAR" javaType="STRING"/>
+        <result column="gender" jdbcType="INTEGER" javaType="INTEGER"/>
+    </resultMap>
+
+    <sql id="baseSql">
+        id, name, gender
+    </sql>
+
+    <insert id="batchSave">
+        insert into t_user (`name`, `gender`) values
+        <foreach item="user" collection="users" separator=",">
+            (#{user.name}, #{user.gender})
+        </foreach>
+    </insert>
+</mapper>
+

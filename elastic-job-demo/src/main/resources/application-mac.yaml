@@ -3,11 +3,49 @@ page-helper:
   helperDialect: mysql
   reasonable: true
   defaultCount: true
+logging:
+  path: ${user.dir}
+server:
+  port: 7770
 spring:
   application:
     name: elastic-job-demo
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://loclhost:3306/php_test
+    url: jdbc:mysql://localhost:3306/test
     username: root
     password: root
+  sql:
+    init:
+      mode: ALWAYS
+      encoding: utf-8
+      schema-locations: sql/init.sql
+      username: root
+      password: root
+mybatis-plus:
+  mapper-location: classpath*:com/example/elastic/job/demo/mapper/**/*.xml
+  type-enums-package: com.example.elastic.job.demo.enums
+elastic-job:
+  regCenter:
+    serverLists: localhost:2181
+    namespace: elastic-job-lite
+  jobs:
+    simpleJob:
+      elasticJobClass: com.example.elastic.job.demo.jobs.MyJob
+      cron: 0/30 * * * * ?
+      timeZone: GMT+08:00
+      shardingTotalCount: 2
+#      shardingItemParameters: 0=Beijing,1=Shanghai,2=Guangzhou
+#    scriptJob:
+#      elasticJobType: SCRIPT
+#      cron: 0/10 * * * * ?
+#      shardingTotalCount: 1
+#      props:
+#        script.command.line: "echo SCRIPT Job: "
+#    manualScriptJob:
+#      elasticJobType: SCRIPT
+#      jobBootstrapBeanName: manualScriptJobBean
+#      shardingTotalCount: 1
+#      props:
+#        script.command.line: "echo Manual SCRIPT Job: "
+

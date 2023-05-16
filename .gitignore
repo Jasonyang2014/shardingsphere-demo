@@ -35,3 +35,5 @@ build/
 ### log ###
 *.log
 *.log.*.gz
+*.log.zip
+

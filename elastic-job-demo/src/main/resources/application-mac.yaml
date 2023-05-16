@@ -17,9 +17,9 @@ spring:
     password: root
   sql:
     init:
-      mode: ALWAYS
+      mode: never
       encoding: utf-8
-      schema-locations: sql/init.sql
+      schema-locations: classpath*:sql/init.sql
       username: root
       password: root
 mybatis-plus:

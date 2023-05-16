@@ -22,10 +22,10 @@ public class MyJob implements SimpleJob {
 
     @Override
     public void execute(ShardingContext shardingContext) {
-        int shardingTotalCount = shardingContext.getShardingTotalCount();
-        String shardingParameter = shardingContext.getShardingParameter();
         log.info("execute job" + shardingContext);
-        List<User> all = userService.findAll();
-        all.forEach(System.out::println);
+        String shardingParameter = shardingContext.getShardingParameter();
+        GenderEnum genderEnum = GenderEnum.valueOf(shardingParameter);
+        List<User> females = userService.findByGender(genderEnum);
+        females.forEach(System.out::println);
     }
 }

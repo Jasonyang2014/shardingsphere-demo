@@ -27,7 +27,7 @@ mybatis-plus:
   type-enums-package: com.example.elastic.job.demo.enums
 elastic-job:
   regCenter:
-    serverLists: localhost:2181
+    serverLists: 127.0.0.1:2181
     namespace: elastic-job-lite
   jobs:
     simpleJob:
@@ -35,7 +35,7 @@ elastic-job:
       elasticJobClass: com.example.elastic.job.demo.jobs.MyJob
       cron: 0/10 * * * * ?
       timeZone: GMT+08:00
-      shardingTotalCount: 1
+      shardingTotalCount: 3
       shardingItemParameters: 0=FEMALE,1=MALE,2=UNKNOW
       job-parameter: 0,1,2
 #    scriptJob:
@@ -52,5 +52,8 @@ elastic-job:
 #        script.command.line: "echo Manual SCRIPT Job: "
   tracing:
     type: RDB
+#  echo "dump@simpleJob" | nc localhost 9999
+  dump:
+    port: 9999
 
 

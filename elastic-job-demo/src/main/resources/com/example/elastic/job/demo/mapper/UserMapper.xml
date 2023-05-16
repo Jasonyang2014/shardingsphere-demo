@@ -7,10 +7,11 @@
         <id column="id" jdbcType="INTEGER" javaType="INTEGER"/>
         <result column="name" jdbcType="VARCHAR" javaType="STRING"/>
         <result column="gender" jdbcType="INTEGER" javaType="INTEGER"/>
+        <result column="last_time" jdbcType="DATE" javaType="DATE"/>
     </resultMap>
 
     <sql id="baseSql">
-        id, name, gender
+        id, name, gender, last_time
     </sql>
 
     <insert id="batchSave">

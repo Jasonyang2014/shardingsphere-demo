@@ -14,4 +14,6 @@ public interface UserService {
     List<User> findAll();
 
     List<User> findByGender(GenderEnum genderEnum);
+
+    int updateUser(List<User> users);
 }

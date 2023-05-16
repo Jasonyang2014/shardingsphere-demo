@@ -7,7 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.elasticjob.api.ShardingContext;
 import org.apache.shardingsphere.elasticjob.simple.job.SimpleJob;
 import org.springframework.stereotype.Component;
+import org.springframework.util.JdkIdGenerator;
+import org.springframework.util.SimpleIdGenerator;
 
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -25,7 +28,12 @@ public class MyJob implements SimpleJob {
         log.info("execute job" + shardingContext);
         String shardingParameter = shardingContext.getShardingParameter();
         GenderEnum genderEnum = GenderEnum.valueOf(shardingParameter);
-        List<User> females = userService.findByGender(genderEnum);
-        females.forEach(System.out::println);
+        SimpleIdGenerator idGenerator = new SimpleIdGenerator();
+        User user = new User();
+        user.setName("z" + idGenerator.generateId().toString().substring(20));
+        user.setGender(genderEnum);
+        user.setLastTime(new Date());
+        userService.save(user);
+        log.info("save user {}", user);
     }
 }

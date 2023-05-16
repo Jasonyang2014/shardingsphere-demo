@@ -8,6 +8,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.example.elastic.job.demo.enums.GenderEnum;
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 @TableName("t_user")
 public class User {
@@ -20,4 +22,7 @@ public class User {
 
     @TableField
     private GenderEnum gender;
+
+    @TableField("last_time")
+    private Date lastTime;
 }

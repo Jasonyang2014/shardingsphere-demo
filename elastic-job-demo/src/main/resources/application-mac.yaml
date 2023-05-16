@@ -38,6 +38,14 @@ elastic-job:
       shardingTotalCount: 3
       shardingItemParameters: 0=FEMALE,1=MALE,2=UNKNOW
       job-parameter: 0,1,2
+    dataflowJob:
+      job-sharding-strategy-type: AVG_ALLOCATION
+      elasticJobClass: com.example.elastic.job.demo.jobs.UserDataflowJob
+      cron: 0/30 * * * * ?
+      timeZone: GMT+08:00
+      shardingTotalCount: 3
+      shardingItemParameters: 0=FEMALE,1=MALE,2=UNKNOW
+      job-parameter: 0,1,2
 #    scriptJob:
 #      elasticJobType: SCRIPT
 #      cron: 0/10 * * * * ?

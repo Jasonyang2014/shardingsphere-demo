@@ -28,7 +28,10 @@
         </encoder>
     </appender>
 
-    <logger name="com.example" level="debug" >
+    <logger name="org.example" level="debug" >
+        <appender-ref ref= "FILE"/>
+    </logger>
+    <logger name="com.xxl.job" level="debug" >
         <appender-ref ref= "FILE"/>
     </logger>
     <logger name="web" level="debug">

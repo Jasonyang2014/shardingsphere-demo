@@ -31,20 +31,32 @@ elastic-job:
     namespace: elastic-job-lite
   jobs:
     simpleJob:
+#      job-error-handler-type: EMAIL
       job-sharding-strategy-type: AVG_ALLOCATION
-      elasticJobClass: com.example.elastic.job.demo.jobs.MyJob
+      elastic-job-class: com.example.elastic.job.demo.jobs.MyJob
       cron: 0/10 * * * * ?
-      timeZone: GMT+08:00
-      shardingTotalCount: 3
-      shardingItemParameters: 0=FEMALE,1=MALE,2=UNKNOW
+      time-zone: GMT+08:00
+      sharding-total-count: 3
+      sharding-item-parameters: 0=FEMALE,1=MALE,2=UNKNOW
       job-parameter: 0,1,2
+      props:
+        email.host: smtp.126.com
+        email.port: 465
+        email.username: tianrenshui1988@126.com
+        email.password: xxxx
+        email.from: tianrenshui1988@126.com
+        email.to: 305744830@qq.com
+        email.subject: "elastic job email test"
+        email.debug: true
+        email.useSsl: true
+        email.ssl.trust: smtp.126.com
     dataflowJob:
       job-sharding-strategy-type: AVG_ALLOCATION
-      elasticJobClass: com.example.elastic.job.demo.jobs.UserDataflowJob
+      elastic-job-class: com.example.elastic.job.demo.jobs.UserDataflowJob
       cron: 0/30 * * * * ?
-      timeZone: GMT+08:00
-      shardingTotalCount: 3
-      shardingItemParameters: 0=FEMALE,1=MALE,2=UNKNOW
+      time-zone: GMT+08:00
+      sharding-total-count: 3
+      sharding-item-parameters: 0=FEMALE,1=MALE,2=UNKNOW
       job-parameter: 0,1,2
 #    scriptJob:
 #      elasticJobType: SCRIPT

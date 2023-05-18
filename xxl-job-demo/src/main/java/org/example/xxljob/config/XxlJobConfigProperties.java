@@ -16,4 +16,32 @@ public class XxlJobConfigProperties {
 
 
     private XxlJobExecutorProperties executor;
+
+    @Data
+    static class XxlAdminProperties {
+
+        private String addresses;
+    }
+
+    @Data
+    static class XxlJobExecutorProperties {
+
+        private String appname;
+
+
+        private String address;
+
+
+        private String ip;
+
+
+        private int port;
+
+
+        private String logPath;
+
+
+        private int logRetentionDays;
+    }
+
 }

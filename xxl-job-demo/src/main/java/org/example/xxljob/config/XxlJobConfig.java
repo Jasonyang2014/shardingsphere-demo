@@ -2,7 +2,6 @@ package org.example.xxljob.config;
 
 import com.xxl.job.core.executor.impl.XxlJobSpringExecutor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,11 +14,11 @@ public class XxlJobConfig {
     public XxlJobSpringExecutor xxlJobExecutor(XxlJobConfigProperties xxlJobConfigProperties) {
         log.info(">>>>>>>>>>> xxl-job config init.");
         XxlJobSpringExecutor xxlJobSpringExecutor = new XxlJobSpringExecutor();
-        XxlAdminProperties admin = xxlJobConfigProperties.getAdmin();
+        XxlJobConfigProperties.XxlAdminProperties admin = xxlJobConfigProperties.getAdmin();
         if (admin != null) {
             xxlJobSpringExecutor.setAdminAddresses(admin.getAddresses());
         }
-        XxlJobExecutorProperties executor = xxlJobConfigProperties.getExecutor();
+        XxlJobConfigProperties.XxlJobExecutorProperties executor = xxlJobConfigProperties.getExecutor();
         xxlJobSpringExecutor.setAppname(executor.getAppname());
         xxlJobSpringExecutor.setAddress(executor.getAddress());
         xxlJobSpringExecutor.setIp(executor.getIp());

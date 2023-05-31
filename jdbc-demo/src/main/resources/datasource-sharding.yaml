@@ -17,6 +17,9 @@ dataSources:
     username: root
     password: yang123test
 rules:
+  - !TRANSACTION
+    defaultType: BASE
+    providerType: Seata
   - !SHARDING
     tables:
       # 数据分片规则配置 <logic_table_name> (+): # 逻辑表名称

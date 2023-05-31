@@ -17,17 +17,20 @@ dataSources:
     username: root
     password: yang123test
 rules:
-- !READWRITE_SPLITTING
-  dataSources:
-    readwrite_ds:
-      staticStrategy:
-        writeDataSourceName: master
-        readDataSourceNames:
-          - slave
-      loadBalancerName: random
-  loadBalancers:
-    random:
-      type: RANDOM
+  - !TRANSACTION
+    defaultType: BASE
+    providerType: Seata
+  - !READWRITE_SPLITTING
+    dataSources:
+      readwrite_ds:
+        staticStrategy:
+          writeDataSourceName: master
+          readDataSourceNames:
+            - slave
+        loadBalancerName: random
+    loadBalancers:
+      random:
+        type: RANDOM
 props:
   sql-show: true
 #  key_1: value_1

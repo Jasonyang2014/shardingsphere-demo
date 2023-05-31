@@ -73,14 +73,6 @@
             <version>1.4.6</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>io.seata</groupId>-->
-<!--            <artifactId>seata-spring-boot-starter</artifactId>-->
-<!--            <version>1.6.1</version>-->
-<!--        </dependency>-->
-
-
-
         <!-- https://mvnrepository.com/artifact/com.mysql/mysql-connector-j -->
         <dependency>
             <groupId>com.mysql</groupId>
@@ -94,13 +86,6 @@
             <!--			<scope>compile</scope>-->
             <optional>true</optional>
         </dependency>
-
-        <!-- https://mvnrepository.com/artifact/io.github.greycode/shardingsphere-transaction-base-seata-at -->
-<!--        <dependency>-->
-<!--            <groupId>io.github.greycode</groupId>-->
-<!--            <artifactId>shardingsphere-transaction-base-seata-at</artifactId>-->
-<!--            <version>5.3.2.4</version>-->
-<!--        </dependency>-->
 
         <!-- https://mvnrepository.com/artifact/io.seata/seata-all -->
         <dependency>

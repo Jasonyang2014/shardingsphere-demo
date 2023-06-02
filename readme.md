@@ -1,7 +1,8 @@
 ## sharding sphere mysql demo
 
+### jdbc模式
 sharding sphere的入口类在驱动类`org.apache.shardingsphere.driver.ShardingSphereDriver`。
-被动处理，每次获取连接的时候才会触发程序运行。
+被动处理，获取连接的时候才会触发程序运行。
 
 进而通过`org.apache.shardingsphere.driver.api.yaml.YamlShardingSphereDataSourceFactory`加载yaml配置
 ```java
@@ -28,7 +29,7 @@ class ShardingSphereDataSourceFactory{
     }
 }
 ```
-最终创建`ShardingSphereDataSource`并缓存。
+创建`ShardingSphereDataSource`并缓存。
 ```java
 class ShardingSphereDataSource{
 
@@ -51,7 +52,6 @@ class ShardingSphereDataSource{
         ContextManagerBuilderParameter param = new ContextManagerBuilderParameter(modeConfig, Collections.singletonMap(databaseName,
                 new DataSourceProvidedDatabaseConfiguration(dataSourceMap, databaseRuleConfigs)), globalRuleConfigs, props, Collections.emptyList(), instanceMetaData, false);
         //根据spi加载ContextManagerBuilder的实现类
-        //
         return TypedSPILoader.getService(ContextManagerBuilder.class, null == modeConfig ? null : modeConfig.getType()).build(param);
     }
 }
@@ -95,7 +95,7 @@ class StandaloneContextManagerBuilder {
         persistConfigurations(persistService, param);
         InstanceContext instanceContext = buildInstanceContext(param);
         new ProcessStandaloneSubscriber(instanceContext.getEventBusContext());
-        //此处非创建一个
+        //此处创建一个
         MetaDataContexts metaDataContexts = MetaDataContextsFactory.create(persistService, param, instanceContext);
         ContextManager result = new ContextManager(metaDataContexts, instanceContext);
         setContextManagerAware(result);
@@ -148,7 +148,7 @@ class GlobalRulesBuilder{
     }
 }
 
-//如果配置了全局事务，会使用定义的事务。如果未定义，会使用默认的的builder
+//如果配置了全局事务，使用定义的事务。如果未定义，使用默认的的builder
 //getMissedDefaultRuleBuilderMap
 class TransactionRuleBuilder{
     @Override
@@ -236,7 +236,7 @@ class ConnectionManager {
 
 }
 ```
-最终的获取`connection`的时候，绑定相应的事务管理器。
+获取`connection`的时候，绑定相应的事务管理器。
 
 `sharding sphere`使用多处使用 **SPI** 加载。
 类`org.apache.shardingsphere.infra.util.spi.ShardingSphereServiceLoader` 加载服务。

@@ -210,6 +210,84 @@ class ShardingSphereTransactionManagerEngine{
         }
     }
 }
+//org.apache.shardingsphere.transaction.base.seata.at.SeataATShardingSphereTransactionManager
+class SeataATShardingSphereTransactionManager{
+    
+    public SeataATShardingSphereTransactionManager() {
+        FileConfiguration config = new FileConfiguration("seata.conf");
+        enableSeataAT = config.getBoolean("sharding.transaction.seata.at.enable", true);
+        applicationId = config.getConfig("client.application.id");
+        transactionServiceGroup = config.getConfig("client.transaction.service.group", "default");
+        globalTXTimeout = config.getInt("sharding.transaction.seata.tx.timeout", 60);
+    }
+
+    @Override
+    public void init(final Map<String, DatabaseType> databaseTypes, final Map<String, DataSource> dataSources, final String providerType) {
+        if (enableSeataAT) {
+            initSeataRPCClient();
+            dataSources.forEach((key, value) -> dataSourceMap.put(key, new DataSourceProxy(value)));
+        }
+    }
+
+    /**
+     * 如果项目未配置 registry.conf, 在初始化的时候会默认使用 seata-config-core-1.5.2.jar!registry.conf
+     * SEATA-SERVER 的配置相关信息
+     */
+    private void initSeataRPCClient() {
+        ShardingSpherePreconditions.checkNotNull(applicationId, () -> new SeataATConfigurationException("Please config application id within seata.conf file"));
+        //初始化TM
+        TMClient.init(applicationId, transactionServiceGroup);
+        //初始化RM
+        RMClient.init(applicationId, transactionServiceGroup);
+    }
+
+    /**
+     * 开启事务，向seata-server 注册分支
+     * @param timeout
+     */
+    @Override
+    @SneakyThrows(TransactionException.class)
+    public void begin(final int timeout) {
+        ShardingSpherePreconditions.checkState(timeout >= 0, TransactionTimeoutException::new);
+        checkSeataATEnabled();
+        GlobalTransaction globalTransaction = GlobalTransactionContext.getCurrentOrCreate();
+        globalTransaction.begin(timeout * 1000);
+        SeataTransactionHolder.set(globalTransaction);
+    }
+
+    /**
+     * 提交事务，通知seata-server分支
+     * @param rollbackOnly
+     */
+    @Override
+    @SneakyThrows(TransactionException.class)
+    public void commit(final boolean rollbackOnly) {
+        checkSeataATEnabled();
+        try {
+            SeataTransactionHolder.get().commit();
+        } finally {
+            SeataTransactionHolder.clear();
+            RootContext.unbind();
+            SeataXIDContext.remove();
+        }
+    }
+
+    /**
+     * 回滚本地分支，通知seata-server分支
+     */
+    @Override
+    @SneakyThrows(TransactionException.class)
+    public void rollback() {
+        checkSeataATEnabled();
+        try {
+            SeataTransactionHolder.get().rollback();
+        } finally {
+            SeataTransactionHolder.clear();
+            RootContext.unbind();
+            SeataXIDContext.remove();
+        }
+    }
+}
 ```
 
 最终`Connection`由`org.apache.shardingsphere.driver.jdbc.core.connection.ShardingSphereConnection`代理。
@@ -241,3 +319,43 @@ class ConnectionManager {
 `sharding sphere`使用多处使用 **SPI** 加载。
 类`org.apache.shardingsphere.infra.util.spi.ShardingSphereServiceLoader` 加载服务。
 - `@SingletonSPI`注解标记的类
+
+seata事务的处理，在`org.apache.shardingsphere.infra.executor.sql.execute.engine.driver.jdbc.JDBCExecutorCallback`添加钩子方法，绑定seata的全局事务TXID
+
+```java
+class JDBCExecutorCallback{
+    private T execute(final JDBCExecutionUnit jdbcExecutionUnit, final boolean isTrunkThread) throws SQLException {
+        SQLExecutorExceptionHandler.setExceptionThrown(isExceptionThrown);
+        DatabaseType storageType = storageTypes.get(jdbcExecutionUnit.getExecutionUnit().getDataSourceName());
+        DataSourceMetaData dataSourceMetaData = getDataSourceMetaData(jdbcExecutionUnit.getStorageResource().getConnection().getMetaData(), storageType);
+        //加载厂商的方法
+        SQLExecutionHook sqlExecutionHook = new SPISQLExecutionHook();
+        try {
+            SQLUnit sqlUnit = jdbcExecutionUnit.getExecutionUnit().getSqlUnit();
+            //sql执行前
+            sqlExecutionHook.start(jdbcExecutionUnit.getExecutionUnit().getDataSourceName(), sqlUnit.getSql(), sqlUnit.getParameters(), dataSourceMetaData, isTrunkThread);
+            T result = executeSQL(sqlUnit.getSql(), jdbcExecutionUnit.getStorageResource(), jdbcExecutionUnit.getConnectionMode(), storageType);
+            //sql执行后
+            sqlExecutionHook.finishSuccess();
+            finishReport(jdbcExecutionUnit);
+            return result;
+        } catch (final SQLException ex) {
+            if (!storageType.equals(protocolType)) {
+                Optional<T> saneResult = getSaneResult(sqlStatement, ex);
+                if (saneResult.isPresent()) {
+                    return isTrunkThread ? saneResult.get() : null;
+                }
+            }
+            sqlExecutionHook.finishFailure(ex);
+            SQLExecutorExceptionHandler.handleException(ex);
+            return null;
+        }
+    }
+}
+
+class SQLExecutionHook{
+    //加载SPI
+    // org.apache.shardingsphere.transaction.base.seata.at.SeataTransactionalSQLExecutionHook
+    private final Collection<SQLExecutionHook> sqlExecutionHooks = ShardingSphereServiceLoader.getServiceInstances(SQLExecutionHook.class);
+}
+```

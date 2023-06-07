@@ -359,3 +359,5 @@ class SQLExecutionHook{
     private final Collection<SQLExecutionHook> sqlExecutionHooks = ShardingSphereServiceLoader.getServiceInstances(SQLExecutionHook.class);
 }
 ```
+
+使用事务，需要开启`@Transaction`，使用seata的事务注解`@globalTransaction`不会生效。

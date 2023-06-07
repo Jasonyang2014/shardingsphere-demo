@@ -13,6 +13,7 @@ import com.github.pagehelper.PageInfo;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,14 +43,19 @@ public class OrderServiceImpl implements OrderService {
         return pageDTO;
     }
 
-    @GlobalTransactional
     @Override
     public Integer saveOrder(Order order) {
         return orderMapper.insert(order);
     }
 
-
-    @GlobalTransactional
+    /**
+     * 开启事务的情况下，会使用seata的事务管理
+     *
+     * @param order     订单
+     * @param orderItem 订单详情
+     * @return 数量
+     */
+    @Transactional
     @Override
     public Integer saveOrderAndItem(Order order, OrderItem orderItem) {
         int orderCnt = orderMapper.insert(order);

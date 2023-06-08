@@ -225,6 +225,7 @@ class SeataATShardingSphereTransactionManager{
     public void init(final Map<String, DatabaseType> databaseTypes, final Map<String, DataSource> dataSources, final String providerType) {
         if (enableSeataAT) {
             initSeataRPCClient();
+            //将数据源缓存，并包装成代理对象。提供给事务获取连接时使用
             dataSources.forEach((key, value) -> dataSourceMap.put(key, new DataSourceProxy(value)));
         }
     }
@@ -290,8 +291,124 @@ class SeataATShardingSphereTransactionManager{
 }
 ```
 
-最终`Connection`由`org.apache.shardingsphere.driver.jdbc.core.connection.ShardingSphereConnection`代理。
-连接管理类`org.apache.shardingsphere.driver.jdbc.core.connection.ConnectionManager`。
+`Connection`连接管理类`org.apache.shardingsphere.driver.jdbc.core.connection.ConnectionManager`。
+
+当有事务需要的时候，会根据事务的配置信息，获取相应的数据源。
+```java
+class ShardingSpherePreparedStatement extends AbstractPreparedStatementAdapter {
+
+    @Override
+    public boolean execute() throws SQLException {
+        try {
+            //其他逻辑省略
+            //
+            return isNeedImplicitCommitTransaction(executionContext) ? executeWithImplicitCommitTransaction() : useDriverToExecute();
+            // CHECKSTYLE:OFF
+        } catch (final Exception ex) {
+            // CHECKSTYLE:ON
+            handleExceptionInTransaction(connection, metaDataContexts);
+            throw SQLExceptionTransformEngine.toSQLException(ex, metaDataContexts.getMetaData().getDatabase(connection.getDatabaseName()).getProtocolType().getType());
+        } finally {
+            clearBatch();
+        }
+    }
+
+    private boolean useDriverToExecute() throws SQLException {
+        ExecutionGroupContext<JDBCExecutionUnit> executionGroupContext = createExecutionGroupContext();
+        cacheStatements(executionGroupContext.getInputGroups());
+        return executor.getRegularExecutor().execute(executionGroupContext,
+                executionContext.getQueryContext(), executionContext.getRouteContext().getRouteUnits(), createExecuteCallback());
+    }
+    //创建执行组上下文
+    private ExecutionGroupContext<JDBCExecutionUnit> createExecutionGroupContext() throws SQLException {
+        DriverExecutionPrepareEngine<JDBCExecutionUnit, Connection> prepareEngine = createDriverExecutionPrepareEngine();
+        //调用父类
+        // org.apache.shardingsphere.infra.executor.sql.prepare.AbstractExecutionPrepareEngine#prepare
+        return prepareEngine.prepare(executionContext.getRouteContext(), executionContext.getExecutionUnits(), new ExecutionGroupReportContext(connection.getDatabaseName()));
+    }
+
+    
+    //org.apache.shardingsphere.infra.executor.sql.prepare.AbstractExecutionPrepareEngine#prepare
+    public final ExecutionGroupContext<T> prepare(final RouteContext routeContext, final Collection<ExecutionUnit> executionUnits,
+                                                  final ExecutionGroupReportContext reportContext) throws SQLException {
+        Collection<ExecutionGroup<T>> result = new LinkedList<>();
+        for (Entry<String, List<SQLUnit>> entry : aggregateSQLUnitGroups(executionUnits).entrySet()) {
+            String dataSourceName = entry.getKey();
+            List<SQLUnit> sqlUnits = entry.getValue();
+            List<List<SQLUnit>> sqlUnitGroups = group(sqlUnits);
+            ConnectionMode connectionMode = maxConnectionsSizePerQuery < sqlUnits.size() ? ConnectionMode.CONNECTION_STRICTLY : ConnectionMode.MEMORY_STRICTLY;
+            result.addAll(group(dataSourceName, sqlUnitGroups, connectionMode));
+        }
+        return decorate(routeContext, result, reportContext);
+    }
+
+    //执行分组
+    //org.apache.shardingsphere.infra.executor.sql.prepare.driver.DriverExecutionPrepareEngine#group
+    protected List<ExecutionGroup<T>> group(final String dataSourceName, final List<List<SQLUnit>> sqlUnitGroups, final ConnectionMode connectionMode) throws SQLException {
+        List<ExecutionGroup<T>> result = new LinkedList<>();
+        //获取连接对象集合
+        List<C> connections = connectionManager.getConnections(dataSourceName, sqlUnitGroups.size(), connectionMode);
+        int count = 0;
+        for (List<SQLUnit> each : sqlUnitGroups) {
+            result.add(createExecutionGroup(dataSourceName, each, connections.get(count++), connectionMode));
+        }
+        return result;
+    }
+
+    //org.apache.shardingsphere.driver.jdbc.core.connection.ConnectionManager#getConnections
+    public List<Connection> getConnections(final String dataSourceName, final int connectionSize, final ConnectionMode connectionMode) throws SQLException {
+        DataSource dataSource = dataSourceMap.get(dataSourceName);
+        Preconditions.checkState(null != dataSource, "Missing the data source name: '%s'", dataSourceName);
+        Collection<Connection> connections;
+        synchronized (cachedConnections) {
+            //是否存在缓存连接对象
+            connections = cachedConnections.get(dataSourceName);
+        }
+        List<Connection> result;
+        if (connections.size() >= connectionSize) {
+            result = new ArrayList<>(connections).subList(0, connectionSize);
+        } else if (!connections.isEmpty()) {
+            result = new ArrayList<>(connectionSize);
+            result.addAll(connections);
+            List<Connection> newConnections = createConnections(dataSourceName, dataSource, connectionSize - connections.size(), connectionMode);
+            result.addAll(newConnections);
+            synchronized (cachedConnections) {
+                cachedConnections.putAll(dataSourceName, newConnections);
+            }
+        } else {
+            //创建连接对象
+            result = new ArrayList<>(createConnections(dataSourceName, dataSource, connectionSize, connectionMode));
+            synchronized (cachedConnections) {
+                //缓存对象
+                cachedConnections.putAll(dataSourceName, result);
+            }
+        }
+        return result;
+    }
+
+    //如果存在事务，则获取事务关联的connection代理对象，如果不存在事务，则获取当前datasource的connection对象
+    private Connection createConnection(final String dataSourceName, final DataSource dataSource, final TransactionConnectionContext transactionConnectionContext) throws SQLException {
+        Optional<Connection> connectionInTransaction = isRawJdbcDataSource(dataSourceName) ? connectionTransaction.getConnection(dataSourceName, transactionConnectionContext) : Optional.empty();
+        return connectionInTransaction.isPresent() ? connectionInTransaction.get() : dataSource.getConnection();
+    }
+
+    //org.apache.shardingsphere.transaction.ConnectionTransaction#getConnection
+    public Optional<Connection> getConnection(final String dataSourceName, final TransactionConnectionContext transactionConnectionContext) throws SQLException {
+        //是否在事务中,如果没有事务，则返回空
+        return isInTransaction(transactionConnectionContext) ? Optional.of(transactionManager.getConnection(this.databaseName, dataSourceName)) : Optional.empty();
+    }
+
+    //获取seata关联的数据对象
+    //org.apache.shardingsphere.transaction.base.seata.at.SeataATShardingSphereTransactionManager
+    public Connection getConnection(final String databaseName, final String dataSourceName) throws SQLException {
+        checkSeataATEnabled();
+        //获取在事务管理器初始化的时候缓存的数据对象
+        return dataSourceMap.get(databaseName + "." + dataSourceName).getConnection();
+    }
+}
+
+```
+
 ```java
 class ConnectionManager {
 
@@ -361,3 +478,39 @@ class SQLExecutionHook{
 ```
 
 使用事务，需要开启`@Transaction`，使用seata的事务注解`@globalTransaction`不会生效。
+`seata`的`undo_log`日志的记录在commit的时候才会写入。代码如下
+
+```java
+class ConnectionProxy{
+    @Override
+    public void commit() throws SQLException {
+        try {
+            lockRetryPolicy.execute(() -> {
+                //提交数据
+                doCommit();
+                return null;
+            });
+        } catch (SQLException e) {
+            if (targetConnection != null && !getAutoCommit() && !getContext().isAutoCommitChanged()) {
+                rollback();
+            }
+            throw e;
+        } catch (Exception e) {
+            throw new SQLException(e);
+        }
+    }
+
+    //事务提交
+    private void doCommit() throws SQLException {
+        if (context.inGlobalTransaction()) {
+            //全局事务，保存undo_log
+            processGlobalTransactionCommit();
+        } else if (context.isGlobalLockRequire()) {
+            //全局锁
+            processLocalCommitWithGlobalLocks();
+        } else {
+            targetConnection.commit();
+        }
+    }
+}
+```

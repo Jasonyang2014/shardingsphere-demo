@@ -433,7 +433,7 @@ class ConnectionManager {
 ```
 获取`connection`的时候，绑定相应的事务管理器。
 
-`sharding sphere`使用多处使用 **SPI** 加载。
+`sharding sphere`多处使用 **SPI** 加载服务。
 类`org.apache.shardingsphere.infra.util.spi.ShardingSphereServiceLoader` 加载服务。
 - `@SingletonSPI`注解标记的类
 
@@ -477,8 +477,9 @@ class SQLExecutionHook{
 }
 ```
 
-使用事务，需要开启`@Transaction`，使用seata的事务注解`@globalTransaction`不会生效。
-`seata`的`undo_log`日志的记录在commit的时候才会写入。代码如下
+使用事务，开启`@Transaction`注解即可。在使用ShardingSphere集成Seata的模式下，单独使用Seata的事务注解`@GlobalTransaction`不会生效。
+因为没有配置`@GlobalTransaction`的注解扫描类，不会对此注解的方法进行处理。注解`@GlobalTransaction`的扫描类`io.seata.spring.annotation.GlobalTransactionScanner`。
+`Seata`的`undo_log`日志的记录在commit的时候才会写入。代码如下
 
 ```java
 class ConnectionProxy{

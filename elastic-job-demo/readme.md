@@ -5,7 +5,7 @@
 - 添加zookeeper节点信息
 - 添加任务的数据库信息
     
-    这个特别坑，默认的界面不支持mysql，需要手动添加驱动到项目ext-lib。elastic-job文档及其粗糙，根本没有啥介绍。在GitHub项目页面才有一些说明。
+    默认的界面不支持mysql，需要手动添加驱动到项目ext-lib。elastic-job文档非常粗糙。在GitHub项目页面才有一些说明。
     另外，application.properties 里面的
 **dynamic.datasource.allowed-driver-classes={'org.h2.Driver','org.postgresql.Driver','com.mysql.jc.jdbc.Driver'}** 
   必须要添加mysql驱动，否则无法添加数据源
@@ -36,10 +36,10 @@
         props:
           email.host: smtp.126.com
           email.port: 465
-          email.username: tianrenshui1988@126.com
+          email.username: xx@126.com
           email.password: xxxx
-          email.from: tianrenshui1988@126.com
-          email.to: 305744830@qq.com
+          email.from: xx@126.com
+          email.to: yy@qq.com
           email.subject: "elastic job email test"
           email.debug: true
           email.useSsl: true

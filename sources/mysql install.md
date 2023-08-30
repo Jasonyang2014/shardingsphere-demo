@@ -50,7 +50,7 @@ docker exec -it mysql-master env LANG=C.UTF_8 /bin/bash
 // % 通配符，代表任意
 create user 'auyeung_slave'@'%';
 // 设置密码
-alter user 'auyeung_slave'@'%' identitied with mysql_native_password by 'yang';
+alter user 'auyeung_slave'@'%' identified with mysql_native_password by 'yang';
 // 设置权限
 grant replication slave on *.* to 'auyeung_slave'@'%';
 // 刷新权限
